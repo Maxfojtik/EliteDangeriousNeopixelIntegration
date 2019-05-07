@@ -38,6 +38,11 @@ public class MicroConnection
 				InputStreamReader ISR = new InputStreamReader(attemptPort.getInputStream());
 				input = new BufferedReader(ISR);
 				output = new BufferedWriter(new OutputStreamWriter(attemptPort.getOutputStream()));
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 				output.write("PING\n");
 				output.flush();
 				try {
