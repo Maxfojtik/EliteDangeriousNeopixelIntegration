@@ -36,7 +36,7 @@ void showCargo()//show cargo
 uint32_t getColorFromPercent(double percent)
 {
   percent = 1-percent;
-  double stage = map(percent, 0, 1, 0, 2);
+  double stage = (percent)*2;
   if(stage < 1)//red to yellow
   {
     return strip.Color(255,(int) ((stage)*255),0);

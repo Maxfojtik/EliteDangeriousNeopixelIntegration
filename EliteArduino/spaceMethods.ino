@@ -38,6 +38,21 @@ void starthyper()
   spot = spot + var3;
   var = 1260;
 }
+void startsuper()
+{
+  var3 = 1+(var2/120);
+  if(var3>=4)
+  {
+    var3 = 4;
+    mode = 5;
+  }
+  var2++;
+
+  
+  space();
+  spot = spot + var3;
+  var = 1260;
+}
 void space()
 {
   readyToSwitch = true;

@@ -4,4 +4,5 @@ void showc()//show color
   {
     strip.setPixelColor(i, color);
   }
+  readyToSwitch = true;
 }

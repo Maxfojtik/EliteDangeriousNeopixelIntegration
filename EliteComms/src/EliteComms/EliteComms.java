@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.HashMap;
 
 import org.json.JSONArray;
@@ -52,10 +53,10 @@ public class EliteComms
 		{
 			MicroConnection.tryConnection();
 		}
+		File fileFolder = new File("C:\\Users\\"+System.getProperty("user.name")+"\\Saved Games\\Frontier Developments\\Elite Dangerous");
 		long lastNum = 0;
 		while(true)
 		{
-			File fileFolder = new File("C:\\Users\\"+System.getProperty("user.name")+"\\Saved Games\\Frontier Developments\\Elite Dangerous");
 			File[] files = fileFolder.listFiles();
 			File journal = null;
 			long newestNum = 0;
@@ -78,6 +79,13 @@ public class EliteComms
 				lastNum = newestNum;
 				FileReader reader = new FileReader(journal);
 				BufferedReader br = new BufferedReader(reader); 
+//				FileReader statusReader = new FileReader(fileFolder.getAbsolutePath()+"/Status.json"); 
+				File statusFile = new File(fileFolder.getAbsolutePath()+"/Status.json");
+				long lastMod = statusFile.lastModified();
+				RandomAccessFile raf = new RandomAccessFile(fileFolder.getAbsolutePath()+"/Status.json", "r");
+				raf.seek(0);
+				String statusLine = raf.readLine();
+				Status.setup(new JSONObject(statusLine));
 				while(br.ready())
 				{
 					String st = br.readLine();
@@ -118,7 +126,25 @@ public class EliteComms
 					}
 					else
 					{
-						Thread.sleep(100);
+						if(lastMod!=statusFile.lastModified())
+						{
+							lastMod = statusFile.lastModified();
+							raf.seek(0);
+							statusLine = raf.readLine();
+							try
+							{
+								JSONObject line = new JSONObject(statusLine);
+								Status.update(line);
+							}
+							catch(Exception e) 
+							{
+//								e.printStackTrace();
+							}
+						}
+						else
+						{
+							Thread.sleep(100);
+						}
 					}
 					if(MicroConnection.input.ready())
 					{
@@ -126,6 +152,7 @@ public class EliteComms
 					}
 				} 
 				br.close();
+				raf.close();
 				System.out.println("Detected Shutdown");
 			}
 			else
@@ -216,10 +243,17 @@ public class EliteComms
 			Thread.sleep(2500);
 			MicroConnection.sendEvent("Collection");
 		}
-		if(line.getString("event").equals("StartJump") && line.getString("JumpType").equals("Hyperspace"))
+		if(line.getString("event").equals("StartJump"))
 		{
 //			Thread.sleep(5000);
-			MicroConnection.sendEvent("StartHyper");
+			if(line.getString("JumpType").equals("Hyperspace"))
+			{
+				MicroConnection.sendEvent("StartHyper");
+			}
+			else if(line.getString("JumpType").equals("Supercruise"))
+			{
+				MicroConnection.sendEvent("StartSuper");
+			}
 		}
 		if(line.getString("event").equals("Docked"))
 		{
@@ -253,28 +287,35 @@ public class EliteComms
 		}
 		if(line.getString("event").equals("ShipTargeted"))
 		{
-			if(line.has("ScanStage"))
+			if(line.getBoolean("TargetLocked"))
 			{
-				if(line.getInt("ScanStage")==0)
+				if(line.has("ScanStage"))
 				{
-					MicroConnection.sendEvent("ScanStage0");
+					if(line.getInt("ScanStage")==0)
+					{
+						MicroConnection.sendEvent("ScanStage0");
+					}
+					if(line.getInt("ScanStage")==1)
+					{
+						MicroConnection.sendEvent("ScanStage1");
+					}
+					if(line.getInt("ScanStage")==2)
+					{
+						MicroConnection.sendEvent("ScanStage2");
+					}
+					if(line.getInt("ScanStage")==3 && line.getString("LegalStatus").equals("Wanted"))
+					{
+						MicroConnection.sendEvent("ScanStageW");
+					}
+					else if(line.getInt("ScanStage")==3)
+					{
+						MicroConnection.sendEvent("ScanStageC");
+					}
 				}
-				if(line.getInt("ScanStage")==1)
-				{
-					MicroConnection.sendEvent("ScanStage1");
-				}
-				if(line.getInt("ScanStage")==2)
-				{
-					MicroConnection.sendEvent("ScanStage2");
-				}
-				if(line.getInt("ScanStage")==3 && line.getString("LegalStatus").equals("Wanted"))
-				{
-					MicroConnection.sendEvent("ScanStageW");
-				}
-				else if(line.getInt("ScanStage")==3)
-				{
-					MicroConnection.sendEvent("ScanStageC");
-				}
+			}
+			else
+			{
+				MicroConnection.sendEvent("ScanCanceled");
 			}
 		}
 		if(line.getString("event").equals("Shutdown"))
@@ -354,7 +395,10 @@ public class EliteComms
 			}
 			System.out.println("Cargo Space: "+cargoSpace);
 		}
-		healthHigh = in.getDouble("HullHealth");
+		if(in.has("HullHealth"))
+		{
+			healthHigh = in.getDouble("HullHealth");
+		}
 	}
 	static void parseMusic(String track)
 	{

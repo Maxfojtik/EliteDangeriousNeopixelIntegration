@@ -10,6 +10,7 @@ void setup() {
   strip.show();
   strip.setBrightness(127);
   pinMode(13, OUTPUT);
+  digitalWrite(13, false);
 }
 
 String complied = "";
@@ -30,10 +31,12 @@ float cRed = 0;
 float cGreen = 0;
 float cBlue = 255;
 
+float sRed = 255;
+float sGreen = 255;
+float sBlue = 255;
+
 void loop()
 {
-  digitalWrite(13, statusLed);
-  statusLed = !statusLed;
   if (!Serial)
   {
     color = 0;
@@ -60,6 +63,8 @@ void loop()
 
 void parse(String thing)//CARGO
 {
+  digitalWrite(13, statusLed);
+  statusLed = !statusLed;
   if (thing == "PING")
   {
     Serial.println("pingElite");
@@ -124,6 +129,10 @@ void parse(String thing)//CARGO
   {
     mode = 13;
   }
+  if (thing.equals("StartSuper"))
+  {
+    mode = 14;
+  }
   if (thing.equals("AsteroidCracked"))
   {
     notification = 2;
@@ -169,6 +178,13 @@ void parse(String thing)//CARGO
     notificationVar = 0;
     notification = 9;
   }
+  if (thing.equals("ScanCanceled"))
+  {
+    if(notification > 4 && notification < 10)
+    {
+      notification = 0;
+    }
+  }
   if (thing.equals("TouchP"))
   {
     notificationVar = 0;
@@ -190,8 +206,33 @@ void parse(String thing)//CARGO
     notificationVar = 0;
     amount = thing.substring(6).toFloat();
   }
+  if (thing.substring(0, 1).equals("R"))
+  {
+    cRed = thing.substring(2).toFloat();
+  }
+  if (thing.substring(0, 1).equals("G"))
+  {
+    cGreen = thing.substring(2).toFloat();
+  }
+  if (thing.substring(0, 1).equals("B"))
+  {
+    cBlue = thing.substring(2).toFloat();
+  }
+  if (thing.substring(0, 2).equals("SR"))
+  {
+    sRed = thing.substring(3).toFloat();
+  }
+  if (thing.substring(0, 2).equals("SG"))
+  {
+    sGreen = thing.substring(3).toFloat();
+  }
+  if (thing.substring(0, 2).equals("SB"))
+  {
+    sBlue = thing.substring(3).toFloat();
+  }
   if (thing.equals("Capital"))
   {
+    notificationVar = 0;
     notification = 14;
   }
   if (thing.substring(0, 6).equals("Health"))
@@ -203,6 +244,26 @@ void parse(String thing)//CARGO
   if (thing.substring(0, 6).equals("HealtH"))
   {
     amountH = thing.substring(7).toFloat();
+  }
+  if (thing.equals("ShieldsUp"))
+  {
+    notificationVar = 0;
+    notification = 15;
+  }
+  if (thing.equals("ShieldsDown"))
+  {
+    notificationVar = 0;
+    notification = 16;
+  }
+  if (thing.equals("OverH"))
+  {
+    notificationVar = 0;
+    notification = 17;
+  }
+  if (thing.equals("CancelN"))
+  {
+    notificationVar = 0;
+    notification = 0;
   }
 }
 void render()
@@ -264,6 +325,10 @@ void render()
     else if (renderMode == 13)
     {
       starthyper();
+    }
+    else if (renderMode == 14)
+    {
+      startsuper();
     }
     if (readyToSwitch && mode != renderMode)
     {
@@ -339,6 +404,18 @@ void render()
     else if (notification == 14)
     {
       capital();
+    }
+    else if (notification == 15)
+    {
+      shieldsUp();
+    }
+    else if (notification == 16)
+    {
+      shieldsDown();
+    }
+    else if (notification == 17)
+    {
+      overHeat();
     }
   }
   strip.show();
