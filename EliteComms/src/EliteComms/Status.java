@@ -9,35 +9,38 @@ public class Status
 	static void update(JSONObject in)
 	{
 //		System.out.println("STAT UPDATED");
-		oldStatus = status;
-		status = in.getInt("Flags");
-		if(getShields(status)!=getShields(oldStatus))
+		if(status==0)//wait for proper data
 		{
-			if(getShields())
+			status = in.getInt("Flags");
+			oldStatus = status;
+		}
+		else
+		{
+			oldStatus = status;
+			status = in.getInt("Flags");
+			if(getShields(status)!=getShields(oldStatus))
 			{
-				MicroConnection.sendEvent("ShieldsUp");
+				if(getShields())
+				{
+					MicroConnection.sendEvent("ShieldsUp");
+				}
+				else
+				{
+					MicroConnection.sendEvent("ShieldsDown");
+				}
 			}
-			else
+			if(getOverHeating(status)!=getOverHeating(oldStatus))
 			{
-				MicroConnection.sendEvent("ShieldsDown");
+				if(getOverHeating())
+				{
+					MicroConnection.sendEvent("OverH");
+				}
+				else
+				{
+					MicroConnection.sendEvent("CancelN");
+				}
 			}
 		}
-		if(getOverHeating(status)!=getOverHeating(oldStatus))
-		{
-			if(getOverHeating())
-			{
-				MicroConnection.sendEvent("OverH");
-			}
-			else
-			{
-				MicroConnection.sendEvent("CancelN");
-			}
-		}
-	}
-	static void setup(JSONObject in)
-	{
-		status = in.getInt("Flags");
-		oldStatus = status;
 	}
 	static boolean getBit(int n, int k) {
 	    return ((n >> k) & 1)==1;

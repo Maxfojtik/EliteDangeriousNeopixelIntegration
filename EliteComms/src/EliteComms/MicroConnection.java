@@ -84,6 +84,18 @@ public class MicroConnection
 		{
 			blueOut = 255;
 		}
+		if(redOut<0)
+		{
+			redOut = 0;
+		}
+		if(greenOut<0)
+		{
+			greenOut = 0;
+		}
+		if(blueOut<0)
+		{
+			blueOut = 0;
+		}
 		return new Color(redOut, greenOut, blueOut);
 	}
 	public MicroConnection()
@@ -92,6 +104,7 @@ public class MicroConnection
 	}
 	static void tryConnection()
 	{
+		Frame.print("Trying to connect");
 		System.out.println("Trying to connect");
 		connected = false;
 		SerialPort[] ports = SerialPort.getCommPorts();
@@ -100,6 +113,7 @@ public class MicroConnection
 			try
 			{
 				SerialPort attemptPort = ports[i];
+				Frame.print("Trying "+attemptPort.getDescriptivePortName());
 				//System.out.println("Trying "+attemptPort.getDescriptivePortName());
 				attemptPort.openPort();
 				InputStreamReader ISR = new InputStreamReader(attemptPort.getInputStream());
@@ -151,6 +165,7 @@ public class MicroConnection
 		}
 		if(connected)
 		{
+			Frame.print("CONNECTED");
 			System.out.println("CONNECTED TO SERIAL");
 			TaskbarIcon.setConnection(true);
 		}
@@ -170,6 +185,7 @@ public class MicroConnection
 	{
 		if(connected)
 		{
+			Frame.print("<-"+event);
 			System.out.println("<-"+event);
 			try {
 				output.write(event+"\n");

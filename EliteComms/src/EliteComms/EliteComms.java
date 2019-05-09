@@ -22,6 +22,7 @@ public class EliteComms
 	static double healthHigh = 1;
 	public static void main(String[] args) throws IOException, InterruptedException, AWTException 
 	{
+		Frame f = new Frame();
 		atri.put("Fileheader", "Mode");
 		atri.put("MusicTrack", "Mode");
 		atri.put("LoadGame", "Mode");
@@ -85,7 +86,7 @@ public class EliteComms
 				RandomAccessFile raf = new RandomAccessFile(fileFolder.getAbsolutePath()+"/Status.json", "r");
 				raf.seek(0);
 				String statusLine = raf.readLine();
-				Status.setup(new JSONObject(statusLine));
+				Status.update(new JSONObject(statusLine));
 				while(br.ready())
 				{
 					String st = br.readLine();
@@ -108,7 +109,7 @@ public class EliteComms
 				boolean contin = false;
 				if(lastLine!=null)
 				{
-					System.out.println("<- "+lastLine.get("event"));
+//					System.out.println("<- "+lastLine.get("event"));
 					contin = !parse(lastLine);
 				}
 				while (contin) 
@@ -117,6 +118,7 @@ public class EliteComms
 					if(st!=null)
 					{
 						System.out.println(st);
+						Frame.print(st);
 						JSONObject line = new JSONObject(st);
 						boolean brea = parse(line);
 						if(brea)
@@ -148,11 +150,14 @@ public class EliteComms
 					}
 					if(MicroConnection.input.ready())
 					{
-						System.out.println("->"+MicroConnection.input.readLine());
+						String line = MicroConnection.input.readLine();
+						Frame.print("->"+line);
+						System.out.println("->"+line);
 					}
 				} 
 				br.close();
 				raf.close();
+				Frame.print("Detected Shutdown");
 				System.out.println("Detected Shutdown");
 			}
 			else
