@@ -8,6 +8,6 @@ There are two projects within this repo, the Arduino project and the Java projec
 | Teensy LC | Works on pin 17 |
 | Arduino Uno | No reason it shouldnt |
 
-Uses these libarys
-jSerialComm https://fazecast.github.io/jSerialComm/ \n
+Uses these libarys 
+jSerialComm https://fazecast.github.io/jSerialComm/ 
 JSON In Java http://www.json.org/
