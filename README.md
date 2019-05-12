@@ -9,5 +9,5 @@ There are two projects within this repo, the Arduino project and the Java projec
 | Arduino Uno | No reason it shouldnt |
 
 Uses these libarys
-jSerialComm https://fazecast.github.io/jSerialComm/
+jSerialComm https://fazecast.github.io/jSerialComm/ \n
 JSON In Java http://www.json.org/
