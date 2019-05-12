@@ -6,6 +6,8 @@ public class Status
 {
 	static int status = 0;
 	static int oldStatus = 0;
+	static int focus = 0;
+	static int oldFocus = 0;
 	static void update(JSONObject in)
 	{
 //		System.out.println("STAT UPDATED");
@@ -13,11 +15,15 @@ public class Status
 		{
 			status = in.getInt("Flags");
 			oldStatus = status;
+			focus = in.getInt("GuiFocus");
+			oldFocus = focus;
 		}
 		else
 		{
 			oldStatus = status;
 			status = in.getInt("Flags");
+			oldFocus = focus;
+			focus = in.getInt("GuiFocus");
 			if(getShields(status)!=getShields(oldStatus))
 			{
 				if(getShields())
@@ -39,6 +45,10 @@ public class Status
 				{
 					MicroConnection.sendEvent("CancelN");
 				}
+			}
+			if(focus==5 && oldFocus!=5)
+			{
+				MicroConnection.sendEvent("Station");
 			}
 		}
 	}

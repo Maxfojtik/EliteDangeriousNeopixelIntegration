@@ -1,8 +1,8 @@
 #include <Adafruit_NeoPixel.h>
 
 #define PIN 2
-
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(60, PIN, NEO_GRB + NEO_KHZ800);
+#define NUMPIXELS 60
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
 void setup() {
   Serial.begin(9600);
@@ -265,6 +265,11 @@ void parse(String thing)//CARGO
     notificationVar = 0;
     notification = 0;
   }
+  if (thing.equals("Station"))
+  {
+    notificationVar = 0;
+    notification = 18;
+  }
 }
 void render()
 {
@@ -416,6 +421,10 @@ void render()
     else if (notification == 17)
     {
       overHeat();
+    }
+    else if (notification == 18)
+    {
+      loadStation();
     }
   }
   strip.show();
