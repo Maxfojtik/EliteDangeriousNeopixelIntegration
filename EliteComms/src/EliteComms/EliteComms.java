@@ -20,6 +20,7 @@ public class EliteComms
 	static HashMap<String, String> atri = new HashMap<String, String>();
 	static JSONObject lastLine = null;
 	static double healthHigh = 1;
+	static String queuedStarClass = "";
 	public static void main(String[] args) throws IOException, InterruptedException, AWTException 
 	{
 		Frame f = new Frame();
@@ -48,6 +49,12 @@ public class EliteComms
 		atri.put("Touchdown", "Notification");
 		atri.put("ProspectedAsteroid", "Notification");
 		atri.put("HullDamage", "Notification");
+		atri.put("FSSDiscoveryScan", "Notification");
+		atri.put("JetConeBoost", "Notification");
+		atri.put("FuelScoop", "Notification");
+		atri.put("MaterialCollected", "Notification");
+		atri.put("Scan", "Notification");
+		atri.put("FSDJump", "Notification");
 		new TaskbarIcon();
 		MicroConnection teensy = new MicroConnection();
 		while(!MicroConnection.connected)
@@ -205,6 +212,18 @@ public class EliteComms
 		{
 			MicroConnection.sendEvent("Undocked");
 		}
+		if(line.getString("event").equals("FSSDiscoveryScan"))
+		{
+			MicroConnection.sendEvent("FSSDiscoveryScan");
+		}
+		if(line.getString("event").equals("JetConeBoost"))
+		{
+			MicroConnection.sendEvent("JetConeBoost");
+		}
+		if(line.getString("event").equals("MaterialCollected"))
+		{
+			MicroConnection.sendEvent("MaterialCollected");
+		}
 		if(line.getString("event").equals("Location"))
 		{
 			if(!line.getBoolean("Docked"))
@@ -264,6 +283,14 @@ public class EliteComms
 		{
 			MicroConnection.sendEvent("Docked");
 		}
+		if(line.getString("event").equals("StartJump") && line.has("StarClass"))
+		{
+			queuedStarClass = line.getString("StarClass");
+		}
+		if(line.getString("event").equals("FSDJump"))
+		{
+			MicroConnection.sendEvent("AAS"+queuedStarClass);
+		}
 		if(line.getString("event").equals("HeatWarning"))
 		{
 			//MicroConnection.sendEvent("HeatWarning");
@@ -284,6 +311,13 @@ public class EliteComms
 				{
 					MicroConnection.sendEvent("Cargo:"+(line.getInt("Count")/(cargoSpace)));
 				}
+			}
+		}
+		if(line.getString("event").equals("FuelScoop"))
+		{
+			if(line.getDouble("Total") % 1==0.0)
+			{
+				MicroConnection.sendEvent("SupercruiseEntry");
 			}
 		}
 		if(line.getString("event").equals("ModuleBuy"))
@@ -363,6 +397,27 @@ public class EliteComms
 		}
 		lastLine = line;
 		return false;
+	}
+	static class SendLater implements Runnable
+	{
+		String event;
+		int delay;
+		public SendLater(String event, int delay)
+		{
+			this.event = event;
+			this.delay = delay;
+		}
+		@Override
+		public void run() 
+		{
+			try {
+				Thread.sleep(delay);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			MicroConnection.sendEvent(event);
+		}
 	}
 	static void buyModule(JSONObject in)
 	{

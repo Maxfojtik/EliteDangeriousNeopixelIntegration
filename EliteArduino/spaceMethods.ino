@@ -1,26 +1,26 @@
 void normalSpace()//all the space methods like hyper space, witch space and normal space. kinda named wrong, sorry
 {
   space();
-  spot = spot + 1;
+  spot = spot + spaceSpeed;
   if (spot > 1260)
   {
     var = 1260;
   }
   else
   {
-    var = var + 1;
+    var = var + spaceSpeed;
   }
 }
 void superCruise()
 {
   space();
-  spot = spot + 4;
+  spot = spot + spaceSpeed;
   var = 1260;
 }
 void hyper()
 {
   space();
-  spot = spot - 8;
+  spot = spot + spaceSpeed;
   var = 1260;
 }
 void starthyper()
@@ -33,9 +33,10 @@ void starthyper()
   }
   var2++;
 
+  spaceSpeed = var3;
   
   space();
-  spot = spot + var3;
+  spot = spot + spaceSpeed;
   var = 1260;
 }
 void startsuper()
@@ -48,9 +49,9 @@ void startsuper()
   }
   var2++;
 
-  
+  spaceSpeed = var3;
   space();
-  spot = spot + var3;
+  spot = spot + spaceSpeed;
   var = 1260;
 }
 void space()

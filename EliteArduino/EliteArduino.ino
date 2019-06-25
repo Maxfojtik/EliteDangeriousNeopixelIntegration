@@ -31,10 +31,24 @@ float cRed = 0;
 float cGreen = 0;
 float cBlue = 255;
 
+float cRedSpeed = 0;
+float cGreenSpeed = 0;
+float cBlueSpeed = 0;
+int numSteps = 100;
+float oldCRed = 0;
+float oldCGreen = 0;
+float oldCBlue = 0;
+int stepCounter = 0;
+
+int spaceSpeed = 4;
 float sRed = 255;
 float sGreen = 255;
 float sBlue = 255;
 
+boolean demo = 0;
+long lastSwitch = 0;
+boolean demoNotifications = false;
+int lastNoti = -1;
 void loop()
 {
   if (!Serial)
@@ -55,6 +69,44 @@ void loop()
       {
         parse(complied);
         complied = "";
+      }
+    }
+  }
+  if(demo && millis()-lastSwitch>1000)
+  {
+    lastSwitch = millis();
+    if(!demoNotifications)
+    {
+      mode++;
+    }
+    if(mode>15)
+    {
+      if(!demoNotifications)
+      {
+        mode = 4;
+        spot = 1000;
+        demoNotifications = true;
+        amount = .5f;
+        amountH = .75f;
+      }
+    }
+  }
+  if(demoNotifications)
+  {
+    Serial.println(notification);
+    if(notification==0)
+    {
+      lastNoti++;
+      if(lastNoti>18)
+      {
+        lastNoti = 0;
+        mode = 0;
+        demoNotifications = false;
+      }
+      else
+      {
+        notificationVar = 0;
+        notification = lastNoti;
       }
     }
   }
@@ -92,14 +144,17 @@ void parse(String thing)//CARGO
       spot = 0;
     }
     mode = 4;
+    spaceSpeed = 1;
   }
   if (thing.equals("SupercruiseEntry"))
   {
     mode = 5;
+    spaceSpeed = 4;
   }
   if (thing.equals("Hyper"))
   {
     mode = 6;
+    spaceSpeed = -8;
   }
   if (thing.equals("DockingRequested"))
   {
@@ -270,9 +325,68 @@ void parse(String thing)//CARGO
     notificationVar = 0;
     notification = 18;
   }
+  if (thing.equals("FSSDiscoveryScan"))
+  {
+    notificationVar = 0;
+    notification = 19;
+  }
+  if (thing.equals("JetConeBoost"))
+  {
+    notificationVar = 0;
+    notification = 20;
+  }
+  if (thing.equals("Scooping"))
+  {
+    mode = 15;
+  }
+  if (thing.equals("MaterialCollected"))
+  {
+    notificationVar = 0;
+    notification = 21;
+  }
+  if (thing.equals("Demo"))
+  {
+    demo = !demo;
+  }
+  if (thing.startsWith("AAS"))//Arrived At Star
+  {
+    oldCRed = cRed;
+    oldCGreen = cGreen;
+    oldCBlue = cBlue;
+    uint32_t color = colorFromClass(thing.substring(3));
+    cBlue = (color)&0xFF;
+    cGreen = (color>>8)&0xFF;
+    cRed = (color>>16)&0xFF;
+    cRedSpeed = (oldCRed-cRed)/numSteps;
+    cGreenSpeed = (oldCGreen-cGreen)/numSteps;
+    cBlueSpeed = (oldCBlue-cBlue)/numSteps;
+    stepCounter = numSteps+500;
+  }
 }
 void render()
 {
+  if(stepCounter>0)
+  {
+    stepCounter--;
+    if(stepCounter<numSteps)
+    {
+      cRed = cRed+cRedSpeed;
+      cGreen = cGreen+cGreenSpeed;
+      cBlue = cBlue+cBlueSpeed;
+    }
+  }
+  else
+  {
+    if(oldCRed!=0 || oldCGreen!=0 || oldCBlue!=0)
+    {
+      cRed = oldCRed;
+      cGreen = oldCGreen;
+      cBlue = oldCBlue;
+      oldCRed = 0;
+      oldCGreen = 0;
+      oldCBlue = 0;
+    }
+  }
   if (notification == 0)
   {
     if (renderMode == 0)
@@ -317,7 +431,7 @@ void render()
     }
     else if (renderMode == 10)
     {
-      heatWarning();
+      //heatWarning();
     }
     else if (renderMode == 11)
     {
@@ -334,6 +448,10 @@ void render()
     else if (renderMode == 14)
     {
       startsuper();
+    }
+    else if (renderMode == 15)
+    {
+      scooping();
     }
     if (readyToSwitch && mode != renderMode)
     {
@@ -372,6 +490,7 @@ void render()
     }
     else if (notification == 5)
     {
+      notification = 0;
       //scan(0);
     }
     else if (notification == 6)
@@ -426,6 +545,162 @@ void render()
     {
       loadStation();
     }
+    else if (notification == 19)
+    {
+      discoveryScan();
+    }
+    else if (notification == 20)
+    {
+      jetConeBoost();
+    }
+    else if (notification == 21)
+    {
+      material();
+    }
   }
   strip.show();
+}
+uint32_t colorFromClass(String star)
+{
+  if(star=="O")
+  {
+    return strip.Color(165, 200, 255);
+  }
+  else if(star=="B")
+  {
+    return strip.Color(127, 165, 248);
+  }
+  else if(star=="A")
+  {
+    return strip.Color(255, 255, 255);
+  }
+  else if(star=="F")
+  {
+    return strip.Color(255, 226, 65);
+  }
+  else if(star=="G")
+  {
+    return strip.Color(255, 226, 0);
+  }
+  else if(star=="K")
+  {
+    return strip.Color(255, 127, 0);
+  }
+  else if(star=="M")
+  {
+    return strip.Color(255, 104, 74);
+  }
+  else if(star=="A_BlueWhiteSuperGiant")
+  {
+    return strip.Color(234, 238, 244);
+  }
+  else if(star=="F_WhiteSuperGiant")
+  {
+    return strip.Color(252, 240, 133);
+  }
+  else if(star=="K_OrangeGiant")
+  {
+    return strip.Color(242, 205, 97);
+  }
+  else if(star=="M_RedGiant")
+  {
+    return strip.Color(255, 104, 74);
+  }
+  else if(star=="M_RedSuperGiant")
+  {
+    return strip.Color(253, 112, 68);
+  }
+  else if(star=="AeBe")
+  {
+    return strip.Color(255, 249, 190);
+  }
+  else if(star=="TTS")
+  {
+    return strip.Color(254, 174, 92);
+  }
+  else if(star=="C")
+  {
+    return strip.Color(187, 14, 43);
+  }
+  else if(star=="CH")
+  {
+    return strip.Color(187, 14, 43);
+  }
+  else if(star=="CHd")
+  {
+    return strip.Color(187, 14, 43);
+  }
+  else if(star=="CJ")
+  {
+    return strip.Color(252, 127, 62);
+  }
+  else if(star=="CN")
+  {
+    return strip.Color(248, 159, 64);
+  }
+  else if(star=="CS")
+  {
+    return strip.Color(248, 159, 64);
+  }
+  else if(star=="MS")
+  {
+    return strip.Color(252, 144, 69);
+  }
+  else if(star=="S")
+  {
+    return strip.Color(255, 191, 88);
+  }
+  else if(star=="W")
+  {
+    return strip.Color(208, 244, 250);
+  }
+  else if(star=="WC")
+  {
+    return strip.Color(208, 244, 250);
+  }
+  else if(star=="WN")
+  {
+    return strip.Color(208, 244, 250);
+  }
+  else if(star=="WNC")
+  {
+    return strip.Color(254, 154, 78);
+  }
+  else if(star=="WO")
+  {
+    return strip.Color(208, 244, 250);
+  }
+  else if(star=="H")
+  {
+    return strip.Color(25, 25, 25);
+  }
+  else if(star=="SupermassiveBlackHole")
+  {
+    return strip.Color(25, 25, 25);
+  }
+  else if(star=="N")
+  {
+    return strip.Color(51, 107, 254);
+  }
+  else if(star.startsWith("D"))
+  {
+    return strip.Color(255, 255, 255);
+  }
+  else if(star=="L")
+  {
+    return strip.Color(255, 0, 0);
+  }
+  else if(star=="T")
+  {
+    return strip.Color(89, 13, 46);
+  }
+  else if(star=="Y")
+  {
+    return strip.Color(65, 8, 50);
+  }
+  else if(star=="X")
+  {
+    return strip.Color(218, 5, 120);
+  }
+  return 0;
 }

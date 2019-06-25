@@ -15,15 +15,21 @@ public class Status
 		{
 			status = in.getInt("Flags");
 			oldStatus = status;
-			focus = in.getInt("GuiFocus");
-			oldFocus = focus;
+			if(in.has("GuiFocus"))
+			{
+				focus = in.getInt("GuiFocus");
+				oldFocus = focus;
+			}
 		}
 		else
 		{
 			oldStatus = status;
 			status = in.getInt("Flags");
-			oldFocus = focus;
-			focus = in.getInt("GuiFocus");
+			if(in.has("GuiFocus"))
+			{
+				oldFocus = focus;
+				focus = in.getInt("GuiFocus");
+			}
 			if(getShields(status)!=getShields(oldStatus))
 			{
 				if(getShields())
@@ -44,6 +50,17 @@ public class Status
 				else
 				{
 					MicroConnection.sendEvent("CancelN");
+				}
+			}
+			if(getScooping(status)!=getScooping(oldStatus))
+			{
+				if(getScooping())
+				{
+					MicroConnection.sendEvent("Scooping");
+				}
+				else
+				{
+					MicroConnection.sendEvent("SupercruiseEntry");
 				}
 			}
 			if(focus==5 && oldFocus!=5)
@@ -70,5 +87,13 @@ public class Status
 	static boolean getOverHeating()
 	{
 		return getBit(status, 20);
+	}
+	static boolean getScooping(int stat)
+	{
+		return getBit(stat, 11);
+	}
+	static boolean getScooping()
+	{
+		return getBit(status, 11);
 	}
 }

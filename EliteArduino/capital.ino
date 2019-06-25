@@ -10,7 +10,7 @@ void capital()//capital ship warp in
     {
       strip.setPixelColor(i, strip.Color(0, 0, 0));
     }
-    if (notificationVar > 20000)
+    if (notificationVar > 20000 || (demoNotifications && notificationVar > 2000))
     {
       notification = 0;
     }
