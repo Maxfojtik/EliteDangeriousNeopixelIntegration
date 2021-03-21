@@ -23,18 +23,20 @@ void hyper()
   spot = spot + spaceSpeed;
   var = 1260;
 }
+int hyperMemory = 0;
 void starthyper()
 {
-  var3 = 8-(var2/40);
+  var3 = 8-(hyperMemory/10);
   if(var3<=-16)
   {
     var3 = -16;
     mode = 6;
+    hyperMemory = 0;
   }
-  var2++;
-  Serial.print(var3);
-  Serial.print("\t");
-  Serial.println(var2);
+  hyperMemory++;
+//  Serial.print(var3);
+//  Serial.print("\t");
+//  Serial.println(var2);
   spaceSpeed = var3;
   
   space();
@@ -43,13 +45,14 @@ void starthyper()
 }
 void startsuper()
 {
-  var3 = 4+(var2/120);
+  var3 = 4+(hyperMemory/30);
   if(var3>=8)
   {
     var3 = 8;
     mode = 5;
+    hyperMemory = 0;
   }
-  var2++;
+  hyperMemory++;
 
   spaceSpeed = var3;
   space();

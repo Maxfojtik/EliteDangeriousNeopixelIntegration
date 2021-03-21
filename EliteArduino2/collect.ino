@@ -13,7 +13,7 @@ void collect()//collector limpet launch
         leds[i] = CRGB(255, 0, 0);
       }
   }
-  notificationVar = notificationVar + 1;
+  notificationVar = notificationVar + 4;
   //if (notificationVar > 3500)
   if (notificationVar > 1000)
   {

@@ -30,9 +30,35 @@ int sort_ace(const void *cmp1, const void *cmp2)
   // A simpler, probably faster way:
   //return b - a;
 }
+void stationServices()//docked
+{
+  if(var2!=-1)
+  {
+    loadStation();
+  }
+  else
+  {
+    if (var3 % 5 == 0)
+    {
+      int i = random(0, NUM_LEDS);
+      if (!leds[i])
+      {
+        leds[i] = CRGB(cRed, cGreen, cBlue);
+      }
+      else
+      {
+        leds[i] = CRGB(0, 0, 0);
+      }
+      readyToSwitch = false;
+    }
+    var = 0;
+  }
+  readyToSwitch = true;
+  var3 = var3 + 1;
+}
 void loadStation()
 {
-  if(notificationVar==0)
+  if(var2==0)//just starting
   {
     for(int i = 0; i < numSections; i++)
     {
@@ -60,11 +86,11 @@ void loadStation()
     }
   }
   boolean good = true;
-  if(notificationVar%5==0)
+  if(var2%2==0)
   {
     for(int i = 0; i < numSections; i++)
     {
-      if(times[i]<=notificationVar)
+      if(times[i]<=var2)
       {
         brights[i] = brights[i]+speeds[i];
       }
@@ -111,9 +137,9 @@ void loadStation()
 //    Serial.println(brights[splitNum]);
     leds[i] = CRGB(cRed*brights[splitNum]/255.0, cGreen*brights[splitNum]/255.0, cBlue*brights[splitNum]/255.0);
   }
-  notificationVar++;
+  var2++;
   if(millis()-goodTime>200 && goodTime!=-1)
   {
-    notification = 0;
+    var2 = -1;
   }
 }

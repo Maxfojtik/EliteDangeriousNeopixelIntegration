@@ -7,9 +7,9 @@ void shieldsDown()
       leds[i] = CRGB(sRed, sGreen, sBlue);
     }
   }
-  leds[notificationVar/10] = 0;
-  leds[NUM_LEDS-notificationVar/10] = 0;
-  if(notificationVar/10==NUM_LEDS)
+  leds[notificationVar/2] = 0;
+  leds[NUM_LEDS-notificationVar/2] = 0;
+  if(notificationVar/2==NUM_LEDS)
   {
     notification = 0;
   }

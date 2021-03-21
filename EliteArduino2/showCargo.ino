@@ -27,7 +27,7 @@ void showCargo()//show cargo
       leds[i] = 0;
     }
   }
-  notificationVar = notificationVar + 1;
+  notificationVar = notificationVar + 4;
   if (notificationVar > 1200)
   {
     notification = 0;

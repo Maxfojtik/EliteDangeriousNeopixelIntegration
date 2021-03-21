@@ -73,7 +73,7 @@ void scan(int stage)//0 = 0. 1 = 1. 2 = 2. 3 = clean. 4 = wanted, scan animation
       }
     }
   }
-  notificationVar = notificationVar + 1;
+  notificationVar = notificationVar + 4;
   if (notificationVar > 3000)
   {
     notification = 0;

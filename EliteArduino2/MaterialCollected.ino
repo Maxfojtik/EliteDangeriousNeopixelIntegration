@@ -1,6 +1,6 @@
 void material()
 {
-  notificationVar++;
+  notificationVar = notificationVar + 4;
   if(notificationVar%250>125)
   {
     for(int i = 0; i < NUM_LEDS; i++)

@@ -3,25 +3,29 @@
 
 //#####CONFIG VALUES
 
-#define PIN 2
-#define NUM_LEDS 60
-#define BRIGHTNESS 127
+#define DATA_PINL 3
+#define DATA_PINR 4
+#define NUM_LEDS 46
+#define BRIGHTNESS 255
 
 //#####END CONFIG
 
 
 CRGB leds[NUM_LEDS];
 
+int freeRam () {
+  extern int __heap_start, *__brkval;
+  int v;
+  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+}
 void setup() {
   Serial.begin(9600);
-  LEDS.addLeds<WS2812, PIN, GRB>(leds, NUM_LEDS);
+  LEDS.addLeds<WS2812, DATA_PINL, GRB>(leds, NUM_LEDS);
+  LEDS.addLeds<WS2812,DATA_PINR,GRB>(leds, NUM_LEDS);
   LEDS.setBrightness(BRIGHTNESS);
 //  FastLED.setMaxPowerInVoltsAndMilliamps(5, 100);
   pinMode(13, OUTPUT);
   digitalWrite(13, false);
-}
-uint32_t colorToInt(uint8_t red, uint8_t green, uint8_t blue) {
-  return (red << 16) | (green << 8) | blue;
 }
 String complied = "";
 int color = 0;
@@ -138,7 +142,7 @@ void parse(String thing)//CARGO
   statusLed = !statusLed;
   if (thing == "PING")
   {
-    Serial.println("pingElite");
+    Serial.println(F("pingElite"));
     for(int i = 0; i < NUM_LEDS; i++)
     {
       leds[i] = CRGB(0, 255, 0);
@@ -151,23 +155,23 @@ void parse(String thing)//CARGO
     }
     LEDS.show();
   }
-  if (thing.equals("Startup"))
+  else if (thing.equals(F("Startup")))
   {
     mode = 1;
   }
-  if (thing.equals("MainMenu"))
+  else if (thing.equals(F("MainMenu")))
   {
     mode = 3;
   }
-  if (thing.equals("LoadGame"))
+  else if (thing.equals(F("LoadGame")))
   {
     mode = 2;
   }
-  if (thing.equals("Docked"))
+  else if (thing.equals(F("Docked")))
   {
     mode = 3;
   }
-  if (thing.equals("Undocked"))
+  else if (thing.equals(F("Undocked")))
   {
     if (mode == 3)
     {
@@ -176,231 +180,244 @@ void parse(String thing)//CARGO
     mode = 4;
     spaceSpeed = 4;
   }
-  if (thing.equals("SupercruiseEntry"))
+  else if (thing.equals(F("SupercruiseEntry")))
   {
     mode = 5;
     spaceSpeed = 8;
   }
-  if (thing.equals("Hyper"))
+  else if (thing.equals(F("Hyper")))
   {
     mode = 6;
     spaceSpeed = -16;
   }
-  if (thing.equals("DockingRequested"))
+  else if (thing.equals(F("DockingRequested")))
   {
     mode = 7;
   }
-  if (thing.equals("DockingGranted"))
+  else if (thing.equals(F("DockingGranted")))
   {
     mode = 8;
   }
-  if (thing.equals("DockingDenied"))
+  else if (thing.equals(F("DockingDenied")))
   {
     mode = 9;
   }
-  if (thing.equals("HeatWarning"))
+  else if (thing.equals(F("HeatWarning")))
   {
     mode = 10;
   }
-  if (thing.equals("AutoDock"))
+  else if (thing.equals(F("AutoDock")))
   {
     mode = 11;
   }
-  if (thing.equals("LaunchSRV"))
+  else if (thing.equals(F("LaunchSRV")))
   {
     mode = 12;
   }
-  if (thing.equals("StartHyper"))
+  else if (thing.equals(F("StartHyper")))
   {
     var3 = 0;
     var2 = 0;
     mode = 13;
   }
-  if (thing.equals("StartSuper"))
+  else if (thing.equals(F("StartSuper")))
   {
     var3 = 0;
     var2 = 0;
     mode = 14;
   }
-  if (thing.equals("AsteroidCracked"))
+  else if (thing.equals(F("StationServices")))
+  {
+    var2 = 0;
+    mode = 16;
+  }
+  else if (thing.equals(F("OutStationServices")))
+  {
+    mode = 3;
+  }
+  else if (thing.equals(F("AsteroidCracked")))
   {
     notification = 2;
     notificationVar = 0;
   }
-  if (thing.equals("Shutdown"))
+  else if (thing.equals(F("Shutdown")))
   {
     color = 0;
     mode = 0;
   }
-  if (thing.equals("Prospector"))
+  else if (thing.equals(F("Prospector")))
   {
     notification = 3;
     notificationVar = 0;
   }
-  if (thing.equals("Collection"))
+  else if (thing.equals(F("Collection")))
   {
     notification = 4;
     notificationVar = 0;
   }
-  if (thing.equals("ScanStage0"))
+  else if (thing.equals(F("ScanStage0")))
   {
     //notificationVar = 0;
     //notification = 5;
   }
-  if (thing.equals("ScanStage1"))
+  else if (thing.equals(F("ScanStage1")))
   {
     notificationVar = 0;
     notification = 6;
   }
-  if (thing.equals("ScanStage2"))
+  else if (thing.equals(F("ScanStage2")))
   {
     notificationVar = 0;
     notification = 7;
   }
-  if (thing.equals("ScanStageC"))
+  else if (thing.equals(F("ScanStageC")))
   {
     notificationVar = 0;
     notification = 8;
   }
-  if (thing.equals("ScanStageW"))
+  else if (thing.equals(F("ScanStageW")))
   {
     notificationVar = 0;
     notification = 9;
   }
-  if (thing.equals("ScanCanceled"))
+  else if (thing.equals(F("ScanCanceled")))
   {
     if(notification > 4 && notification < 10)
     {
       notification = 0;
     }
   }
-  if (thing.equals("TouchP"))
+  else if (thing.equals(F("TouchP")))
   {
     notificationVar = 0;
     notification = 10;
   }
-  if (thing.equals("TouchC"))
+  else if (thing.equals(F("TouchC")))
   {
     notificationVar = 0;
     notification = 11;
   }
-  if (thing.equals("ProspectedAsteroid"))
+  else if (thing.equals(F("ProspectedAsteroid")))
   {
     notificationVar = 0;
     notification = 12;
   }
-  if (thing.substring(0, 5).equals("Cargo"))
+  else if (thing.substring(0, 5).equals(F("Cargo")))
   {
     notification = 1;
     notificationVar = 0;
     amount = thing.substring(6).toFloat();
   }
-  if (thing.substring(0, 1).equals("R"))
+  else if (thing.substring(0, 1).equals("R"))
   {
     cRed = thing.substring(2).toFloat();
   }
-  if (thing.substring(0, 1).equals("G"))
+  else if (thing.substring(0, 1).equals("G"))
   {
     cGreen = thing.substring(2).toFloat();
   }
-  if (thing.substring(0, 1).equals("B"))
+  else if (thing.substring(0, 1).equals("B"))
   {
     cBlue = thing.substring(2).toFloat();
   }
-  if (thing.substring(0, 2).equals("SR"))
+  else if (thing.substring(0, 2).equals("SR"))
   {
     sRed = thing.substring(3).toFloat();
   }
-  if (thing.substring(0, 2).equals("SG"))
+  else if (thing.substring(0, 2).equals("SG"))
   {
     sGreen = thing.substring(3).toFloat();
   }
-  if (thing.substring(0, 2).equals("SB"))
+  else if (thing.substring(0, 2).equals("SB"))
   {
     sBlue = thing.substring(3).toFloat();
   }
-  if (thing.equals("Capital"))
+  else if (thing.equals(F("Capital")))
   {
     notificationVar = 0;
     notification = 14;
   }
-  if (thing.substring(0, 6).equals("Health"))
+  else if (thing.substring(0, 6).equals(F("Health")))
   {
     notification = 13;
     notificationVar = -1;
     amount = thing.substring(7).toFloat();
   }
-  if (thing.substring(0, 6).equals("HealtH"))
+  else if (thing.substring(0, 6).equals(F("HealtH")))
   {
     amountH = thing.substring(7).toFloat();
   }
-  if (thing.equals("ShieldsUp"))
+  else if (thing.equals(F("ShieldsUp")))
   {
     notificationVar = 0;
     notification = 15;
   }
-  if (thing.equals("ShieldsDown"))
+  else if (thing.equals(F("ShieldsDown")))
   {
     notificationVar = 0;
     notification = 16;
   }
-  if (thing.equals("OverH"))
+  else if (thing.equals(F("OverH")))
   {
     notificationVar = 0;
     notification = 17;
   }
-  if (thing.equals("CancelN"))
+  else if (thing.equals(F("CancelN")))
   {
     notificationVar = 0;
     notification = 0;
   }
-  if (thing.equals("Station"))
-  {
-    notificationVar = 0;
-    notification = 18;
-  }
-  if (thing.equals("FSSDiscoveryScan"))
+//  else if (thing.equals(F("Station")))
+//  {
+//    notificationVar = 0;
+//    notification = 18;
+//  }
+  else if (thing.equals(F("FSSDiscoveryScan")))
   {
     notificationVar = 0;
     notification = 19;
   }
-  if (thing.equals("JetConeBoost"))
+  else if (thing.equals(F("JetConeBoost")))
   {
     notificationVar = 0;
     notification = 20;
   }
-  if (thing.equals("Scooping"))
+  else if (thing.equals(F("Scooping")))
   {
     mode = 15;
   }
-  if (thing.equals("MaterialCollected"))
+  else if (thing.equals(F("MaterialCollected")))
   {
     notificationVar = 0;
     notification = 21;
   }
-  if (thing.equals("WingJoin"))
+  else if (thing.equals(F("WingJoin")))
   {
     notificationVar = 0;
     notification = 22;
   }
-  if (thing.equals("Bounty"))
+  else if (thing.equals(F("Ounty")))
   {
     notificationVar = 0;
     notification = 23;
   }
-  if (thing.equals("Demo"))
+  else if (thing.equals(F("Demo")))
   {
     demo = !demo;
   }
-  if (thing.startsWith("AAS"))//Arrived At Star
+  else if (thing.startsWith(F("AAS")))//Arrived At Star
   {
     oldCRed = cRed;
     oldCGreen = cGreen;
     oldCBlue = cBlue;
     uint32_t color = colorFromClass(thing.substring(3));
+    Serial.println(color);
     cBlue = (color)&0xFF;
     cGreen = (color>>8)&0xFF;
     cRed = (color>>16)&0xFF;
+    Serial.println(cRed);
+    Serial.println(cGreen);
+    Serial.println(cBlue);
     cRedSpeed = (oldCRed-cRed)/numSteps;
     cGreenSpeed = (oldCGreen-cGreen)/numSteps;
     cBlueSpeed = (oldCBlue-cBlue)/numSteps;
@@ -497,6 +514,10 @@ void render()
     {
       scooping();
     }
+    else if (renderMode == 16)
+    {
+      stationServices();
+    }
     if (readyToSwitch && mode != renderMode)
     {
       Serial.print("Mode to ");
@@ -510,6 +531,7 @@ void render()
   }
   else
   {
+    Serial.println(notification);
     if (notification == 1)
     {
       showCargo();
@@ -611,6 +633,9 @@ void render()
     }
   }
   LEDS.show();
+}
+uint32_t colorToInt(uint8_t red, uint8_t green, uint8_t blue) {
+  return (red << 16) | (green << 8) | blue;
 }
 uint32_t colorFromClass(String star)
 {
